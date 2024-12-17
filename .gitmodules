@@ -1,3 +1,6 @@
 [submodule "external/freeglut"]
 	path = external/freeglut
 	url = https://github.com/FreeGLUTProject/freeglut.git
+[submodule "external/glew"]
+	path = external/glew
+	url = https://github.com/Perlmint/glew-cmake

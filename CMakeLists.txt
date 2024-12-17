@@ -11,9 +11,11 @@ add_subdirectory(external/glew)
 add_executable(${PROJECT_NAME} main.cpp)
 
 
-target_link_libraries(${PROJECT_NAME} PRIVATE freeglut_static glew)
+target_link_libraries(${PROJECT_NAME} PRIVATE freeglut_static libglew_static)
+target_link_directories(${PROJECT_NAME} PRIVATE external/glew/lib)
 target_include_directories(${PROJECT_NAME} PRIVATE 
     external/freeglut/include
+    external/glew/include
 )
 
 # Idea is to move them into one folder 
@@ -23,3 +25,6 @@ get_property(FREEGLUT_TARGETS DIRECTORY external/freeglut PROPERTY BUILDSYSTEM_T
 foreach(target IN LISTS FREEGLUT_TARGETS)
     set_property(TARGET ${target} PROPERTY FOLDER "FreeGLUT")
 endforeach()
+
+set_property(TARGET libglew_shared PROPERTY FOLDER "glew")
+set_property(TARGET libglew_static PROPERTY FOLDER "glew")
