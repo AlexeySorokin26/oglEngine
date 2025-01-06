@@ -7,6 +7,8 @@ project(${PROJECT_NAME})
 add_subdirectory(external/freeglut)
 # Add GLEW as a subdirectory
 add_subdirectory(external/glew)
+# glm 
+add_subdirectory(external/glm)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
@@ -16,6 +18,7 @@ target_link_directories(${PROJECT_NAME} PRIVATE external/glew/lib)
 target_include_directories(${PROJECT_NAME} PRIVATE 
     external/freeglut/include
     external/glew/include
+    external/glm
 )
 
 # Idea is to move them into one folder 
