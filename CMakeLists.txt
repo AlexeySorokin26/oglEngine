@@ -9,6 +9,10 @@ add_subdirectory(external/freeglut)
 add_subdirectory(external/glew)
 # glm 
 add_subdirectory(external/glm)
+# General lib
+add_subdirectory(General)
+# Rendering
+add_subdirectory(Rendering)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
@@ -20,6 +24,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     external/glew/include
     external/glm
 )
+target_link_libraries(${PROJECT_NAME} PUBLIC General)
+target_link_libraries(${PROJECT_NAME} PRIVATE Rendering)
 
 # Idea is to move them into one folder 
 # Retrieve the list of all targets created in the external/freeglut directory
