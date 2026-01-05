@@ -120,31 +120,38 @@ void RenderSceneCB() {
 	glutSwapBuffers();
 }
 
-// Главная функция
+void RenderSceneCB1() {
+	static GLclampf c = 0.0f;
+	c += 1.0f / 256.0f;
+	if (c >= 1.0f)
+		c = 0.0f;
+	std::cout << c << std::endl;
+	glClearColor(c, c, c, 1); // set color which we will set the screen
+	glClear(GL_COLOR_BUFFER_BIT); // acutally clear it
+	glutSwapBuffers();
+	glutPostRedisplay();
+}
+
 int main(int argc, char** argv) {
-
-
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-	glutCreateWindow("Rotating Cube");
 
-	glewInit();
+	int w = 1920;
+	int h = 1080;
+	glutInitWindowSize(w, h);
 
-	glEnable(GL_DEPTH_TEST);
+	int x = 0;
+	int y = 0;
+	glutInitWindowPosition(x, y);
 
-	shaderProgram = new ShaderProgram(pVSFileName, pFSFileName);
-	shaderProgram->Bind();
+	int win = glutCreateWindow("Tutorial 1");
 
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+	GLclampf red = 0.0f, green = 0.0f, blue = 1.0f, alpha = 0.0f; // floats
+	glClearColor(red, green, blue, alpha);
 
-	CreateBuffers();
+	glutDisplayFunc(RenderSceneCB1); // call this callback func if we need to redraw the window
 
-	glutDisplayFunc(RenderSceneCB);
-	glutIdleFunc(RenderSceneCB);
-
-	glutMainLoop();
+	glutMainLoop(); // run infinite loop to handle events 
 
 	return 0;
 }
