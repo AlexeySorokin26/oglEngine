@@ -19,7 +19,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     external/glm
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC General)
-target_link_libraries(${PROJECT_NAME} PRIVATE Rendering)
+#target_link_libraries(${PROJECT_NAME} PRIVATE Rendering)
 
 # we get here all targets from freeglut
 get_property(

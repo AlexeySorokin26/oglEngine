@@ -1,3 +1,7 @@
+#define _USE_MATH_DEFINES
+#define _CRT_SECURE_NO_WARNINGS
+#define NOMINMAX
+
 #include "ShaderProgram.h"
 
 #include "utility.h"
