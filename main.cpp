@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "General/mymath.h"
+#include "Rendering/ShaderProgram.h"
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
@@ -8,13 +9,15 @@
 
 
 GLuint VBO;
+ShaderProgram* sp;
 
 void RenderSceneCB1() {
-	glClear(GL_COLOR_BUFFER_BIT);  // actually clear it color buffer
+	glClear(GL_COLOR_BUFFER_BIT);       // actually clear it color buffer
+	sp->Bind();
 	glBindBuffer(GL_ARRAY_BUFFER, VBO); // activate our vbo (tells gpu we are going to use it)
 	glEnableVertexAttribArray(0);       // open gate for our data 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // tell gpu how to interpritate data. Stride is a number of elements to the next element in buffer. Offset here is a number of elements from the begginng to our element.
-	glDrawArrays(GL_TRIANGLES, 0, 3); // finaly tell gpu to render using our VBO. It is massive sets of operation. Drivers tells gpu start reading from the bounded buffer	and pass data through the pipeline 
+	glDrawArrays(GL_TRIANGLES, 0, 3);   // finaly tell gpu to render using our VBO. It is massive sets of operation. Drivers tells gpu start reading from the bounded buffer	and pass data through the pipeline 
 	glDisableVertexAttribArray(0);
 	glutSwapBuffers();
 	glutPostRedisplay();
@@ -22,7 +25,7 @@ void RenderSceneCB1() {
 
 void CreateVertexBuffer() {
 	Vector3f vertices[3];
-	vertices[0] = Vector3f(-1.0f, -1.0f, 0.0f);
+	vertices[0] = Vector3f(0.0f, -1.0f, 0.0f);
 	vertices[1] = Vector3f(0.0f, 1.0f, 0.0f);
 	vertices[2] = Vector3f(1.0f, -1.0f, 0.0f);
 
@@ -54,11 +57,14 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-
-	GLclampf red = 0.0f, green = 0.0f, blue = 1.0f, alpha = 0.0f; // floats
+	GLclampf red = 0.0f, green = 1.0f, blue = 1.0f, alpha = 0.0f; // floats
 	glClearColor(red, green, blue, alpha);
 
 	CreateVertexBuffer();
+
+	std::string vp = "C:\\Users\\AlexeySorokin\\Desktop\\oglEngine\\shaders\\shader.vs";
+	std::string fp = "C:\\Users\\AlexeySorokin\\Desktop\\oglEngine\\shaders\\shader.fs";
+	sp = new ShaderProgram(vp.c_str(), fp.c_str());
 
 	glutDisplayFunc(RenderSceneCB1); // call this callback func if we need to redraw the window
 

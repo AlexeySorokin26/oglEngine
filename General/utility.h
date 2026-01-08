@@ -6,7 +6,6 @@
 // Чтение шейдеров из файла
 static bool ReadFile(const char* pFileName, std::string& outFile) {
 	std::ifstream f(pFileName);
-	bool ret = false;
 	if (f.is_open()) {
 		std::string line;
 		while (getline(f, line)) {
@@ -14,10 +13,7 @@ static bool ReadFile(const char* pFileName, std::string& outFile) {
 			outFile.append("\n");
 		}
 		f.close();
-		ret = true;
+		return true;
 	}
-	else {
-		throw std::runtime_error("file not opened: " + std::string(pFileName));
-	}
-	return ret;
+	return false;
 }
