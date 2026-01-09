@@ -1,12 +1,10 @@
-#define _USE_MATH_DEFINES
-#define _CRT_SECURE_NO_WARNINGS
-#define NOMINMAX
-
 #include "ShaderProgram.h"
 
 #include "utility.h"
 
 #include <glm/gtc/type_ptr.hpp>
+
+#include <iostream>
 
 ShaderProgram::ShaderProgram(const char* vertexFile, const char* fragmentFile) {
 	std::string vertexCode, fragmentCode;
@@ -72,11 +70,24 @@ void ShaderProgram::CheckShaderCompilation(GLuint shader, const std::string& typ
 	}
 }
 
-void ShaderProgram::SetMatrix4(const char* name, const glm::mat4& matrix) const {
-	// get location by name, amount of args, transponse or not, pointer to data specially for glm such way
-	glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
+void ShaderProgram::SetMatrix4(const char* name, const glm::mat4& matrix, const bool rowMajor) const {
+	// get location by name, amount of args, transpose or not, pointer to data specially for glm such way
+	// glm::mat4 is column major 
+	// 1 2 3 4
+	// 5 6 7 8 
+	// so it goes 1 -> 5 -> 2 -> 6
+	// false here means column major
+	glUniformMatrix4fv(GetUniformLocation(name), 1, rowMajor, glm::value_ptr(matrix));
+}
+
+void ShaderProgram::SetFloat(const char* name, float v) const {
+	glUniform1f(GetUniformLocation(name), v);
 }
 
 GLint ShaderProgram::GetUniformLocation(const char* name) const {
-	return glGetUniformLocation(id, name);
+	GLint location = glGetUniformLocation(id, name);
+	if (location == -1) {
+		throw("Error getting uniform location for " + std::string(name) + "\n");
+	}
+	return location;
 }

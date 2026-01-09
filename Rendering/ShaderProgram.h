@@ -11,11 +11,14 @@ public:
 	void Bind() const;
 	void Unbind();
 	bool IsCompiled() const { return isCompiled; }
-	void SetMatrix4(const char* name, const glm::mat4& matrix) const;
+	void SetMatrix4(const char* name, const glm::mat4& matrix, const bool rowMajor = false) const;
+	void SetFloat(const char* name, float v) const;
 
-	// Проверка на ошибки шейдера
 	void CheckShaderCompilation(GLuint shader, const std::string& type);
 
+	/// @brief Get index for specific variable
+	/// @param name 
+	/// @return 
 	GLint GetUniformLocation(const char* name) const;
 private:
 	bool isCompiled = false;

@@ -7,12 +7,24 @@
 
 #include <iostream>
 
+#include <glm/gtc/matrix_transform.hpp>
 
 GLuint VBO;
 ShaderProgram* sp;
 
 void RenderSceneCB1() {
 	glClear(GL_COLOR_BUFFER_BIT);       // actually clear it color buffer
+
+	static float scale = 0.0f;
+	static float delta = 0.01f;
+
+	scale += delta;
+	if ((scale >= 1.0f) || (scale <= -1.0f)) {
+		delta *= -1.0f;
+	}
+	glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(scale * 2, scale, 0));
+	sp->SetMatrix4("translation", translation);
+
 	sp->Bind();
 	glBindBuffer(GL_ARRAY_BUFFER, VBO); // activate our vbo (tells gpu we are going to use it)
 	glEnableVertexAttribArray(0);       // open gate for our data 
@@ -57,13 +69,13 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	GLclampf red = 0.0f, green = 1.0f, blue = 1.0f, alpha = 0.0f; // floats
+	GLclampf red = 0.0f, green = 0.0f, blue = 1.0f, alpha = 0.0f; // floats
 	glClearColor(red, green, blue, alpha);
 
 	CreateVertexBuffer();
 
-	std::string vp = "C:\\Users\\AlexeySorokin\\Desktop\\oglEngine\\shaders\\shader.vs";
-	std::string fp = "C:\\Users\\AlexeySorokin\\Desktop\\oglEngine\\shaders\\shader.fs";
+	std::string vp = "C:\\Users\\PC\\Desktop\\OGLDEV\\src\\shaders\\shader.vs";
+	std::string fp = "C:\\Users\\PC\\Desktop\\OGLDEV\\src\\shaders\\shader.fs";
 	sp = new ShaderProgram(vp.c_str(), fp.c_str());
 
 	glutDisplayFunc(RenderSceneCB1); // call this callback func if we need to redraw the window
