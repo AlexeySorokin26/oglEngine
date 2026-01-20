@@ -6,47 +6,96 @@
 #include <GL/freeglut.h>
 
 #include <iostream>
+#include <vector>
 
 #include <glm/gtc/matrix_transform.hpp>
 
 GLuint VBO;
+GLuint IBO;
 ShaderProgram* sp;
 
 void RenderSceneCB1() {
-	glClear(GL_COLOR_BUFFER_BIT);       // actually clear it color buffer
-
-	static float scale = 0.0f;
-	static float delta = 0.01f;
-
-	scale += delta;
-	if ((scale >= 1.0f) || (scale <= -1.0f)) {
-		delta *= -1.0f;
+	glClear(GL_COLOR_BUFFER_BIT);
+	static float angleInDegrees = 45.0f;
+	angleInDegrees += 0.01;
+	if (angleInDegrees >= 360.0f) {
+		angleInDegrees -= 360.0f;
 	}
-	glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(scale * 2, scale, 0));
-	sp->SetMatrix4("translation", translation);
+	// glm uses column major 
+	// so we need to enter stuff correctly
+	glm::mat4 rotationZ = glm::rotate(glm::mat4(1.0f), glm::radians(angleInDegrees), glm::vec3(0, 0, 1)); // c
+	glm::mat4 rotationX = glm::rotate(glm::mat4(1.0f), glm::radians(angleInDegrees), glm::vec3(1, 0, 0)); // c
 
+	glm::mat4 translation = glm::translate(glm::mat4(1.0f),  // c
+		glm::vec3(0, 0, 1.5));
+
+	float fov = 90.f;
+	float tanHalfFov = tanf(glm::radians(fov / 2.0f));
+	float f = 1.0f / tanHalfFov;
+
+	glm::mat4 projection = glm::mat4( // c
+		f, 0, 0, 0,
+		0, f, 0, 0,
+		0, 0, 1, 1,
+		0, 0, 0, 1
+	);
+
+	glm::mat4 finalMatrix = projection * translation * rotationX * rotationZ; // c *
+
+	sp->SetMatrix4("finalMatrix", finalMatrix, false);
 	sp->Bind();
-	glBindBuffer(GL_ARRAY_BUFFER, VBO); // activate our vbo (tells gpu we are going to use it)
+	glBindBuffer(GL_ARRAY_BUFFER, VBO); // Assosiate our created vbo with specific buffer (array buffer in this case)
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 	glEnableVertexAttribArray(0);       // open gate for our data 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // tell gpu how to interpritate data. Stride is a number of elements to the next element in buffer. Offset here is a number of elements from the begginng to our element.
-	glDrawArrays(GL_TRIANGLES, 0, 3);   // finaly tell gpu to render using our VBO. It is massive sets of operation. Drivers tells gpu start reading from the bounded buffer	and pass data through the pipeline 
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);   // finaly tell gpu to render using our VBO. It is massive sets of operation. Drivers tells gpu start reading from the bounded buffer	and pass data through the pipeline 
 	glDisableVertexAttribArray(0);
 	glutSwapBuffers();
 	glutPostRedisplay();
 }
 
 void CreateVertexBuffer() {
-	Vector3f vertices[3];
-	vertices[0] = Vector3f(0.0f, -1.0f, 0.0f);
-	vertices[1] = Vector3f(0.0f, 1.0f, 0.0f);
-	vertices[2] = Vector3f(1.0f, -1.0f, 0.0f);
+	Vector3f vertices[8];
+	vertices[0] = Vector3f(0.5f, 0.5f, 0.5f);      // 0
+	vertices[1] = Vector3f(-0.5f, 0.5f, -0.5f);    // 1  
+	vertices[2] = Vector3f(-0.5f, 0.5f, 0.5f);     // 2
+	vertices[3] = Vector3f(0.5f, -0.5f, -0.5f);    // 3
+	vertices[4] = Vector3f(-0.5f, -0.5f, -0.5f);   // 4
+	vertices[5] = Vector3f(0.5f, 0.5f, -0.5f);     // 5
+	vertices[6] = Vector3f(0.5f, -0.5f, 0.5f);     // 6
+	vertices[7] = Vector3f(-0.5f, -0.5f, 0.5f);    // 7
 
 	// Create a handle for VBO. Which provides access to the gpu memory
 	glGenBuffers(1, &VBO);
-	// Assosiate our created vbo with specific buffer 
+	// Assosiate our created vbo with specific buffer (array buffer in this case)
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// Load our vertices in VBO. Note what we don't use VBO here since we bind it before 
+	// Load our vertices in VBO. VBO now associates with this data. Note what we don't use VBO here since we bind it before 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+}
+
+void CreateIndexBuffer() {
+	std::vector<unsigned int> indices{
+		0, 1, 2,
+		1, 3, 4,
+		5, 6, 3,
+		7, 3, 6,
+		2, 4, 7,
+		0, 7, 6,
+		0, 5, 1,
+		1, 5, 3,
+		5, 0, 6,
+		7, 4, 3,
+		2, 1, 4,
+		0, 2, 7
+	};
+
+
+	// Create a handle for IBO. Which provides access to the gpu memory
+	glGenBuffers(1, &IBO);
+	// Assosiate our created IBO with specific buffer (array buffer in this case)
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+	// Load our vertices in IBO. IBO now associates with this data. Note what we don't use IBO here since we bind it before 
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 }
 
 int main(int argc, char** argv) {
@@ -72,10 +121,15 @@ int main(int argc, char** argv) {
 	GLclampf red = 0.0f, green = 0.0f, blue = 1.0f, alpha = 0.0f; // floats
 	glClearColor(red, green, blue, alpha);
 
-	CreateVertexBuffer();
+	glEnable(GL_CULL_FACE); // Enable cull facing 
+	glFrontFace(GL_CW);  // Front face triangles are Clock wise 
+	glCullFace(GL_BACK); // Cull back face triangles
 
-	std::string vp = "C:\\Users\\PC\\Desktop\\OGLDEV\\src\\shaders\\shader.vs";
-	std::string fp = "C:\\Users\\PC\\Desktop\\OGLDEV\\src\\shaders\\shader.fs";
+	CreateVertexBuffer();
+	CreateIndexBuffer();
+
+	std::string vp = "C:\\Users\\AlexeySorokin\\Desktop\\oglEngine\\shaders\\shader.vs";
+	std::string fp = "C:\\Users\\AlexeySorokin\\Desktop\\oglEngine\\shaders\\shader.fs";
 	sp = new ShaderProgram(vp.c_str(), fp.c_str());
 
 	glutDisplayFunc(RenderSceneCB1); // call this callback func if we need to redraw the window
