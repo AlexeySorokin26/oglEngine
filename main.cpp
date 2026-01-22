@@ -14,10 +14,13 @@ GLuint VBO;
 GLuint IBO;
 ShaderProgram* sp;
 
+int w = 1920;
+int h = 1080;
+
 void RenderSceneCB1() {
 	glClear(GL_COLOR_BUFFER_BIT);
 	static float angleInDegrees = 45.0f;
-	angleInDegrees += 0.01;
+	angleInDegrees += 0.05;
 	if (angleInDegrees >= 360.0f) {
 		angleInDegrees -= 360.0f;
 	}
@@ -27,17 +30,23 @@ void RenderSceneCB1() {
 	glm::mat4 rotationX = glm::rotate(glm::mat4(1.0f), glm::radians(angleInDegrees), glm::vec3(1, 0, 0)); // c
 
 	glm::mat4 translation = glm::translate(glm::mat4(1.0f),  // c
-		glm::vec3(0, 0, 1.5));
+		glm::vec3(0, 0, 5));
 
 	float fov = 90.f;
 	float tanHalfFov = tanf(glm::radians(fov / 2.0f));
 	float f = 1.0f / tanHalfFov;
+	float ar = (float)w / (float)h;
+	float nearZ = 1.f;
+	float farZ = 10.f;
+	float zRange = nearZ - farZ;
+	float a = (-farZ - nearZ) / zRange;
+	float b = 2.f * farZ * nearZ / zRange;
 
-	glm::mat4 projection = glm::mat4( // c
-		f, 0, 0, 0,
+	glm::mat4 projection = glm::mat4( // c // it's transposed becaseu of column major which uses glm
+		f / ar, 0, 0, 0,
 		0, f, 0, 0,
-		0, 0, 1, 1,
-		0, 0, 0, 1
+		0, 0, a, 1,
+		0, 0, b, 0
 	);
 
 	glm::mat4 finalMatrix = projection * translation * rotationX * rotationZ; // c *
@@ -102,8 +111,6 @@ int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 
-	int w = 1920;
-	int h = 1080;
 	glutInitWindowSize(w, h);
 
 	int x = 0;
@@ -128,8 +135,8 @@ int main(int argc, char** argv) {
 	CreateVertexBuffer();
 	CreateIndexBuffer();
 
-	std::string vp = "C:\\Users\\AlexeySorokin\\Desktop\\oglEngine\\shaders\\shader.vs";
-	std::string fp = "C:\\Users\\AlexeySorokin\\Desktop\\oglEngine\\shaders\\shader.fs";
+	std::string vp = "C:\\Users\\PC\\Desktop\\OGLDEV\\src\\shaders\\shader.vs";
+	std::string fp = "C:\\Users\\PC\\Desktop\\OGLDEV\\src\\shaders\\shader.fs";
 	sp = new ShaderProgram(vp.c_str(), fp.c_str());
 
 	glutDisplayFunc(RenderSceneCB1); // call this callback func if we need to redraw the window
