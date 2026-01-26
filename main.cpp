@@ -2,6 +2,8 @@
 
 #include "General/mymath.h"
 #include "Rendering/ShaderProgram.h"
+#include "Rendering/Camera.h"
+#include "Rendering/ObjectTransform.h"
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
@@ -13,36 +15,21 @@
 GLuint VBO;
 GLuint IBO;
 ShaderProgram* sp;
+Camera* pGameCamera = nullptr;
+ObjectTransform objTransform;
 
 int w = 1920;
 int h = 1080;
 
-void RenderSceneCB1() {
+void RenderSceneCB() {
 	glClear(GL_COLOR_BUFFER_BIT);
 	static float angleInDegrees = 45.0f;
 	angleInDegrees += 0.05;
 	if (angleInDegrees >= 360.0f) {
 		angleInDegrees -= 360.0f;
 	}
-	// glm uses column major 
-	// so we need to enter stuff correctly
-	glm::mat4 rotationZ = glm::rotate(glm::mat4(1.0f), glm::radians(angleInDegrees), glm::vec3(0, 0, 1)); // c
-	glm::mat4 rotationX = glm::rotate(glm::mat4(1.0f), glm::radians(angleInDegrees), glm::vec3(1, 0, 0)); // c
 
-	glm::mat4 translation = glm::translate(glm::mat4(1.0f),  // c
-		glm::vec3(0, 0, 5));
-
-	glm::vec3 camPos(5.f, 0.f, 0.f);
-	glm::vec3 u(1.f, 0.f, 0.f);
-	glm::vec3 v(0.f, 1.f, 0.f);
-	glm::vec3 n(0.f, 0.f, 1.f);
-
-	glm::mat4 camMat(
-		u.x, v.x, n.x, 0.0f,
-		u.y, v.y, n.y, 0.0f,
-		u.z, v.z, n.z, 0.0f,
-		-camPos.x, -camPos.y, -camPos.z, 1.0f
-	);
+	objTransform;
 
 	float fov = 90.f;
 	float tanHalfFov = tanf(glm::radians(fov / 2.0f));
@@ -119,6 +106,18 @@ void CreateIndexBuffer() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 }
 
+static void InitializeGlutCallbacks()
+{
+	glutDisplayFunc(RenderSceneCB);
+	glutIdleFunc(RenderSceneCB);
+	glutSpecialFunc(SpecialKeyboardCB);
+}
+
+static void SpecialKeyboardCB(int Key, int x, int y)
+{
+	GameCamera.OnKeyboard(Key);
+}
+
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
@@ -151,7 +150,7 @@ int main(int argc, char** argv) {
 	std::string fp = "C:\\Users\\AlexeySorokin\\Desktop\\oglEngine\\shaders\\shader.fs";
 	sp = new ShaderProgram(vp.c_str(), fp.c_str());
 
-	glutDisplayFunc(RenderSceneCB1); // call this callback func if we need to redraw the window
+	InitializeGlutCallbacks(); // call this callback func if we need to redraw the window
 
 	glutMainLoop(); // run infinite loop to handle events 
 
