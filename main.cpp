@@ -32,6 +32,18 @@ void RenderSceneCB1() {
 	glm::mat4 translation = glm::translate(glm::mat4(1.0f),  // c
 		glm::vec3(0, 0, 5));
 
+	glm::vec3 camPos(5.f, 0.f, 0.f);
+	glm::vec3 u(1.f, 0.f, 0.f);
+	glm::vec3 v(0.f, 1.f, 0.f);
+	glm::vec3 n(0.f, 0.f, 1.f);
+
+	glm::mat4 camMat(
+		u.x, v.x, n.x, 0.0f,
+		u.y, v.y, n.y, 0.0f,
+		u.z, v.z, n.z, 0.0f,
+		-camPos.x, -camPos.y, -camPos.z, 1.0f
+	);
+
 	float fov = 90.f;
 	float tanHalfFov = tanf(glm::radians(fov / 2.0f));
 	float f = 1.0f / tanHalfFov;
@@ -42,14 +54,14 @@ void RenderSceneCB1() {
 	float a = (-farZ - nearZ) / zRange;
 	float b = 2.f * farZ * nearZ / zRange;
 
-	glm::mat4 projection = glm::mat4( // c // it's transposed becaseu of column major which uses glm
+	glm::mat4 projection = glm::mat4( // c // it's transposed because of column major which uses glm
 		f / ar, 0, 0, 0,
 		0, f, 0, 0,
 		0, 0, a, 1,
 		0, 0, b, 0
 	);
 
-	glm::mat4 finalMatrix = projection * translation * rotationX * rotationZ; // c *
+	glm::mat4 finalMatrix = projection * camMat * translation * rotationX * rotationZ; // c *
 
 	sp->SetMatrix4("finalMatrix", finalMatrix, false);
 	sp->Bind();
@@ -135,8 +147,8 @@ int main(int argc, char** argv) {
 	CreateVertexBuffer();
 	CreateIndexBuffer();
 
-	std::string vp = "C:\\Users\\PC\\Desktop\\OGLDEV\\src\\shaders\\shader.vs";
-	std::string fp = "C:\\Users\\PC\\Desktop\\OGLDEV\\src\\shaders\\shader.fs";
+	std::string vp = "C:\\Users\\AlexeySorokin\\Desktop\\oglEngine\\shaders\\shader.vs";
+	std::string fp = "C:\\Users\\AlexeySorokin\\Desktop\\oglEngine\\shaders\\shader.fs";
 	sp = new ShaderProgram(vp.c_str(), fp.c_str());
 
 	glutDisplayFunc(RenderSceneCB1); // call this callback func if we need to redraw the window
