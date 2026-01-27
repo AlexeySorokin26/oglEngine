@@ -4,6 +4,7 @@
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Camera.h"
 #include "Rendering/ObjectTransform.h"
+#include "Rendering/Projection.h"
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
@@ -15,40 +16,25 @@
 GLuint VBO;
 GLuint IBO;
 ShaderProgram* sp;
-Camera* pGameCamera = nullptr;
+
+Camera camera;
+
 ObjectTransform objTransform;
 
+float fov = 90.f;
+float zNear = 1.f;
+float zFar = 10.f;
 int w = 1920;
 int h = 1080;
+PerspectiveProjection perspectiveProjection;
 
 void RenderSceneCB() {
 	glClear(GL_COLOR_BUFFER_BIT);
-	static float angleInDegrees = 45.0f;
-	angleInDegrees += 0.05;
-	if (angleInDegrees >= 360.0f) {
-		angleInDegrees -= 360.0f;
-	}
+	static float angleInDegrees = .04f;
+	objTransform.SetPosition(0, 0, 4);
+	objTransform.Rotate(0, angleInDegrees, 0);
 
-	objTransform;
-
-	float fov = 90.f;
-	float tanHalfFov = tanf(glm::radians(fov / 2.0f));
-	float f = 1.0f / tanHalfFov;
-	float ar = (float)w / (float)h;
-	float nearZ = 1.f;
-	float farZ = 10.f;
-	float zRange = nearZ - farZ;
-	float a = (-farZ - nearZ) / zRange;
-	float b = 2.f * farZ * nearZ / zRange;
-
-	glm::mat4 projection = glm::mat4( // c // it's transposed because of column major which uses glm
-		f / ar, 0, 0, 0,
-		0, f, 0, 0,
-		0, 0, a, 1,
-		0, 0, b, 0
-	);
-
-	glm::mat4 finalMatrix = projection * camMat * translation * rotationX * rotationZ; // c *
+	glm::mat4 finalMatrix = perspectiveProjection.GetMatrix() * camera.GetMatrix() * objTransform.GetMatrix(); 
 
 	sp->SetMatrix4("finalMatrix", finalMatrix, false);
 	sp->Bind();
@@ -106,16 +92,16 @@ void CreateIndexBuffer() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 }
 
+static void SpecialKeyboardCB(int Key, int x, int y)
+{
+	camera.OnKeyboard(Key);
+}
+
 static void InitializeGlutCallbacks()
 {
 	glutDisplayFunc(RenderSceneCB);
 	glutIdleFunc(RenderSceneCB);
 	glutSpecialFunc(SpecialKeyboardCB);
-}
-
-static void SpecialKeyboardCB(int Key, int x, int y)
-{
-	GameCamera.OnKeyboard(Key);
 }
 
 int main(int argc, char** argv) {
@@ -151,6 +137,8 @@ int main(int argc, char** argv) {
 	sp = new ShaderProgram(vp.c_str(), fp.c_str());
 
 	InitializeGlutCallbacks(); // call this callback func if we need to redraw the window
+
+	perspectiveProjection = PerspectiveProjection(fov, w, h, zNear, zFar);
 
 	glutMainLoop(); // run infinite loop to handle events 
 

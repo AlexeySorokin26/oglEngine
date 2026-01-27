@@ -2,12 +2,14 @@ set(SRC
 	ShaderProgram.cpp
 	Camera.cpp
 	ObjectTransform.cpp
+	Projection.cpp
 )
 
 set(HEADERS 
 	ShaderProgram.h
 	Camera.h
 	ObjectTransform.h
+	Projection.h
 )
 
 add_library(Rendering STATIC ${SRC} ${HEADERS})
