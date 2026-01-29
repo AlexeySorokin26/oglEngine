@@ -10,6 +10,7 @@ set(HEADERS
 	Camera.h
 	ObjectTransform.h
 	Projection.h
+	Quaternion.h
 )
 
 add_library(Rendering STATIC ${SRC} ${HEADERS})

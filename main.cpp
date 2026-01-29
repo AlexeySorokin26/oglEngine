@@ -17,7 +17,7 @@ GLuint VBO;
 GLuint IBO;
 ShaderProgram* sp;
 
-Camera camera;
+
 
 ObjectTransform objTransform;
 
@@ -26,15 +26,22 @@ float zNear = 1.f;
 float zFar = 10.f;
 int w = 1920;
 int h = 1080;
+glm::vec3 camPos(0, 0, -1);
+glm::vec3 camTarget(0, 0, 1);
+glm::vec3 camUp(0, 1, 0);
+Camera camera(w, h, camPos, camTarget, camUp);
 PerspectiveProjection perspectiveProjection;
 
 void RenderSceneCB() {
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	camera.OnRender();
+
 	static float angleInDegrees = .04f;
 	objTransform.SetPosition(0, 0, 4);
 	objTransform.Rotate(0, angleInDegrees, 0);
 
-	glm::mat4 finalMatrix = perspectiveProjection.GetMatrix() * camera.GetMatrix() * objTransform.GetMatrix(); 
+	glm::mat4 finalMatrix = perspectiveProjection.GetMatrix() * camera.GetMatrix() * objTransform.GetMatrix();
 
 	sp->SetMatrix4("finalMatrix", finalMatrix, false);
 	sp->Bind();
@@ -103,12 +110,18 @@ static void KeyboardCB(unsigned char Key, int x, int y) {
 	camera.OnKeyboard(Key);
 }
 
+// Mouse movement without clicking 
+static void PassiveMouseCB(int x, int y) {
+	camera.OnMouse(x, y);
+}
+
 static void InitializeGlutCallbacks()
 {
 	glutDisplayFunc(RenderSceneCB);
 	glutIdleFunc(RenderSceneCB);
 	glutSpecialFunc(SpecialKeyboardCB);
 	glutKeyboardFunc(KeyboardCB);
+	glutPassiveMotionFunc(PassiveMouseCB);
 }
 
 int main(int argc, char** argv) {
@@ -142,6 +155,8 @@ int main(int argc, char** argv) {
 	std::string vp = "C:\\Users\\AlexeySorokin\\Desktop\\oglEngine\\shaders\\shader.vs";
 	std::string fp = "C:\\Users\\AlexeySorokin\\Desktop\\oglEngine\\shaders\\shader.fs";
 	sp = new ShaderProgram(vp.c_str(), fp.c_str());
+
+	glutFullScreen();
 
 	InitializeGlutCallbacks(); // call this callback func if we need to redraw the window
 
