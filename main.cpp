@@ -92,8 +92,14 @@ void CreateIndexBuffer() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 }
 
+// Handle special keys (arrows, page up/down, etc.)
 static void SpecialKeyboardCB(int Key, int x, int y)
 {
+	camera.OnKeyboard(Key);
+}
+
+// Handle regular keys (W, A, S, D, +, -, etc.)
+static void KeyboardCB(unsigned char Key, int x, int y) {
 	camera.OnKeyboard(Key);
 }
 
@@ -102,6 +108,7 @@ static void InitializeGlutCallbacks()
 	glutDisplayFunc(RenderSceneCB);
 	glutIdleFunc(RenderSceneCB);
 	glutSpecialFunc(SpecialKeyboardCB);
+	glutKeyboardFunc(KeyboardCB);
 }
 
 int main(int argc, char** argv) {

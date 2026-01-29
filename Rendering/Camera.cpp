@@ -15,8 +15,21 @@ void Camera::SetPosition(float x, float y, float z) {
 	pos.z = z;
 }
 
+void Camera::OnKeyboard(unsigned char key) {
+	switch (key) {
+	case 'w':
+	case 'W':
+		pos += (up * speed);
+		break;
+	case 's':
+	case 'S':
+		pos -= (up * speed);
+		break;
+	break;
+	}
+}
 
-void Camera::OnKeyboard(unsigned char Key) {
+void Camera::OnKeyboard(int Key) {
 	switch (Key) {
 
 	case GLUT_KEY_UP:
@@ -74,7 +87,7 @@ glm::mat4 Camera::InitCameraMatrix(const glm::vec3& target, const glm::vec3& up)
 		u.x, v.x, n.x, 0.0f,
 		u.y, v.y, n.y, 0.0f,
 		u.z, v.z, n.z, 0.0f,
-		-pos.x, -pos.y, -pos.z, 1.0f
+		-glm::dot(u, pos), -glm::dot(v, pos), -glm::dot(n, pos), 1.0f
 	);
 
 	return camMat;

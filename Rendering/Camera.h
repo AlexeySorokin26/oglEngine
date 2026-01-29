@@ -9,6 +9,7 @@ public:
 
 	void SetPosition(float x, float y, float z);
 
+	void OnKeyboard(int key);
 	void OnKeyboard(unsigned char key);
 
 	glm::mat4 GetMatrix();
